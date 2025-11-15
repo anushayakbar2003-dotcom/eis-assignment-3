@@ -1,0 +1,215 @@
+{
+  "info": {
+    "name": "Automotive EIS System - API Collection",
+    "description": "Postman collection for testing Automotive EIS System APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Supplier Management",
+      "item": [
+        {
+          "name": "Create Supplier",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"SUP-001\",\n  \"name\": \"AutoParts Co.\",\n  \"contact\": \"contact@autoparts.com\",\n  \"leadTimeDays\": 7,\n  \"certifications\": \"ISO 9001, IATF 16949\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/suppliers",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "suppliers"]
+            }
+          }
+        },
+        {
+          "name": "Get All Suppliers",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/suppliers",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "suppliers"]
+            }
+          }
+        },
+        {
+          "name": "Get Supplier by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/suppliers/SUP-001",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "suppliers", "SUP-001"]
+            }
+          }
+        },
+        {
+          "name": "Update Supplier Performance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"supplierId\": \"SUP-001\",\n  \"onTimeDeliveryPercent\": 95.5,\n  \"defectRate\": 2.0,\n  \"returns\": 5\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/suppliers/performance/event",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "suppliers", "performance", "event"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory Management",
+      "item": [
+        {
+          "name": "Query Inventory",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/P-123",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "inventory", "P-123"]
+            }
+          }
+        },
+        {
+          "name": "Adjust Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adjustmentId\": \"ADJ-001\",\n  \"partId\": \"P-123\",\n  \"delta\": -5,\n  \"reason\": \"QC failed - scrapped\",\n  \"lot\": \"LOT-445\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/v1/inventory/adjust",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "v1", "inventory", "adjust"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Purchase Order Management",
+      "item": [
+        {
+          "name": "Create Purchase Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"poId\": \"PO-001\",\n  \"supplierId\": \"SUP-001\",\n  \"partId\": \"P-123\",\n  \"quantity\": 100,\n  \"status\": \"CREATED\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/purchase-orders",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "purchase-orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Purchase Order",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "http://localhost:8080/api/purchase-orders/PO-001",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "purchase-orders", "PO-001"]
+            }
+          }
+        },
+        {
+          "name": "Update PO Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/purchase-orders/PO-001/status",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "purchase-orders", "PO-001", "status"]
+            }
+          }
+        },
+        {
+          "name": "Match Receipt & Generate GRN",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"receivedQty\": 95,\n  \"inspectedQty\": 95\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/purchase-orders/PO-001/match-receipt",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8080",
+              "path": ["api", "purchase-orders", "PO-001", "match-receipt"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+
