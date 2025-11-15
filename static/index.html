@@ -1,0 +1,3150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoTech SCM - Supply Chain Management System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-blue: #0a192f;
+            --secondary-blue: #112240;
+            --accent-blue: #172a45;
+            --bright-cyan: #64ffda;
+            --cyan-blue: #7bccf2;
+            --light-blue: #8892b0;
+            --orange: #ff6b35;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --gradient-1: linear-gradient(135deg, #0a192f 0%, #1a3a5f 100%);
+            --gradient-2: linear-gradient(135deg, #112240 0%, #1e4d7e 100%);
+            --sidebar-width: 280px;
+            --sidebar-collapsed: 70px;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--primary-blue);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(100, 255, 218, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(87, 203, 255, 0.08) 0px, transparent 50%);
+            min-height: 100vh;
+            color: var(--light-blue);
+            overflow-x: hidden;
+        }
+        
+        /* Layout */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--secondary-blue);
+            border-right: 2px solid rgba(100, 255, 218, 0.2);
+            transition: all 0.3s ease;
+            position: fixed;
+            height: 100vh;
+            z-index: 1000;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed);
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.3em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #64ffda 0%, #57cbff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+        
+        .sidebar.collapsed .logo span {
+            display: none;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #8bf0d8, #57cbff);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.3);
+            flex-shrink: 0;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--bright-cyan);
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+        
+        .close-sidebar {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--bright-cyan);
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+        }
+        
+        .close-sidebar:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            position: relative;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 25px;
+            color: var(--light-blue);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95em;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-link:hover {
+            background: rgba(100, 255, 218, 0.1);
+            color: var(--bright-cyan);
+            border-left-color: var(--bright-cyan);
+        }
+        
+        .nav-link.active {
+            background: linear-gradient(135deg, rgba(100, 255, 218, 0.15), rgba(87, 203, 255, 0.15));
+            color: var(--bright-cyan);
+            border-left-color: var(--bright-cyan);
+        }
+        
+        .sidebar.collapsed .nav-link span:not(.nav-icon) {
+            display: none;
+        }
+        
+        .nav-icon {
+            font-size: 1.2em;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            padding: 0;
+        }
+        
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed);
+        }
+        
+        .top-bar {
+            background: var(--secondary-blue);
+            border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--bright-cyan);
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-toggle:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .notifications {
+            position: relative;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .notifications:hover {
+            background: rgba(100, 255, 218, 0.1);
+        }
+        
+        .badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            border: 2px solid var(--secondary-blue);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 15px;
+            background: rgba(100, 255, 218, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-profile:hover {
+            background: rgba(100, 255, 218, 0.2);
+        }
+        
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #64ffda, #57cbff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--primary-blue);
+            font-size: 0.9em;
+        }
+        
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: var(--bright-cyan);
+            font-size: 0.9em;
+        }
+        
+        .user-role {
+            font-size: 0.75em;
+            color: var(--light-blue);
+            opacity: 0.8;
+        }
+        
+        .content-area {
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .page-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .page-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Dashboard */
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-header h1 {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            font-weight: 800;
+            color: var(--bright-cyan);
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-header p {
+            color: var(--light-blue);
+            font-size: clamp(0.9em, 2vw, 1.1em);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--gradient-2);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(100, 255, 218, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #64ffda, #57cbff);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(100, 255, 218, 0.2);
+            border-color: rgba(100, 255, 218, 0.3);
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .stat-title {
+            color: var(--light-blue);
+            font-size: 0.9em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            background: rgba(100, 255, 218, 0.15);
+        }
+        
+        .stat-value {
+            font-size: clamp(1.8em, 4vw, 2.5em);
+            font-weight: 800;
+            color: var(--bright-cyan);
+            margin-bottom: 5px;
+        }
+        
+        .stat-change {
+            font-size: 0.85em;
+            color: var(--success);
+        }
+        
+        /* Section */
+        .section {
+            background: var(--gradient-2);
+            padding: clamp(20px, 3vw, 35px);
+            border-radius: 20px;
+            border: 1px solid rgba(100, 255, 218, 0.15);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .section:hover {
+            border-color: rgba(100, 255, 218, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .section-title {
+            font-size: clamp(1.3em, 3vw, 1.8em);
+            font-weight: 700;
+            color: var(--bright-cyan);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(180deg, #64ffda, #57cbff);
+            border-radius: 2px;
+        }
+        
+        /* Forms */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--bright-cyan);
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--accent-blue);
+            border: 2px solid rgba(100, 255, 218, 0.15);
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--light-blue);
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        input::placeholder {
+            color: rgba(136, 146, 176, 0.5);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--bright-cyan);
+            box-shadow: 0 0 20px rgba(100, 255, 218, 0.2);
+            background: var(--secondary-blue);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #64ffda 0%, #57cbff 100%);
+            color: var(--primary-blue);
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 20px rgba(100, 255, 218, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(100, 255, 218, 0.5);
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #57cbff 0%, #8892b0 100%);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-actions button {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 20px;
+        }
+        
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid rgba(100, 255, 218, 0.15);
+            margin-top: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--accent-blue);
+            min-width: 600px;
+        }
+        
+        th {
+            background: var(--secondary-blue);
+            color: var(--bright-cyan);
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(100, 255, 218, 0.2);
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+            color: var(--light-blue);
+        }
+        
+        tr:hover {
+            background: rgba(100, 255, 218, 0.05);
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        
+        .status-active {
+            background: rgba(74, 222, 128, 0.2);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+        
+        .status-pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: var(--warning);
+            border: 1px solid var(--warning);
+        }
+        
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+        
+        /* Response Display */
+        .response {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: var(--accent-blue);
+            border-left: 4px solid var(--bright-cyan);
+            display: none;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .response.show {
+            display: block;
+        }
+        
+        .response.success {
+            border-left-color: var(--success);
+            background: rgba(74, 222, 128, 0.1);
+        }
+        
+        .response.error {
+            border-left-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+        
+        .response-content {
+            padding: 20px;
+        }
+        
+        .response-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .response-icon {
+            font-size: 1.5em;
+        }
+        
+        .response-message {
+            color: var(--light-blue);
+            line-height: 1.8;
+            margin-bottom: 16px;
+        }
+        
+        .response-details {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 0.9em;
+        }
+        
+        .response-details-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--bright-cyan);
+        }
+        
+        .response-details-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .response-details-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+        }
+        
+        .response-details-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .response-details-key {
+            color: var(--bright-cyan);
+            font-weight: 500;
+            display: inline-block;
+            min-width: 120px;
+        }
+        
+        .response-details-value {
+            color: var(--light-blue);
+        }
+        
+        pre {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--bright-cyan);
+            padding: 18px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 13px;
+            line-height: 1.6;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(100, 255, 218, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--bright-cyan);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--light-blue);
+        }
+        
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state-text {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        
+        /* Mobile Overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 47, 0.8);
+            z-index: 999;
+            backdrop-filter: blur(5px);
+        }
+        
+        .mobile-overlay.active {
+            display: block;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--primary-blue);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #64ffda, #57cbff);
+            border-radius: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #57cbff, #64ffda);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .mobile-overlay {
+                display: none;
+            }
+            
+            .mobile-overlay.active {
+                display: block;
+            }
+            
+            .user-info {
+                display: none;
+            }
+            
+            .close-sidebar {
+                display: block;
+            }
+            
+            .menu-toggle {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .content-area {
+                padding: 20px 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .quick-actions button {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .top-bar {
+                padding: 15px 20px;
+            }
+            
+            button {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .content-area {
+                padding: 15px 10px;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.5em;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-profile {
+                padding: 6px 10px;
+            }
+            
+            .avatar {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar" id="sidebar">
+            <button class="close-sidebar" onclick="closeMobileMenu()">✕</button>
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">🚗</div>
+                    <span>AutoTech SCM</span>
+                </div>
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+            </div>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a class="nav-link active" onclick="showPage('dashboard')">
+                        <span class="nav-icon">📊</span>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('suppliers')">
+                        <span class="nav-icon">🏭</span>
+                        <span>Suppliers</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('forecasting')">
+                        <span class="nav-icon">📈</span>
+                        <span>Forecasting</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('inventory')">
+                        <span class="nav-icon">📦</span>
+                        <span>Inventory</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('purchase-orders')">
+                        <span class="nav-icon">📋</span>
+                        <span>Purchase Orders</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('receiving')">
+                        <span class="nav-icon">📥</span>
+                        <span>Receiving</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('quality')">
+                        <span class="nav-icon">✅</span>
+                        <span>Quality Control</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('orders')">
+                        <span class="nav-icon">🛒</span>
+                        <span>Orders</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('shipments')">
+                        <span class="nav-icon">🚚</span>
+                        <span>Shipments</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('invoicing')">
+                        <span class="nav-icon">💰</span>
+                        <span>Invoicing</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('returns-recalls')">
+                        <span class="nav-icon">🔄</span>
+                        <span>Returns & Recalls</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="showPage('reports')">
+                        <span class="nav-icon">📊</span>
+                        <span>Reports</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Mobile Overlay -->
+        <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+                <div class="user-menu">
+                    <div class="notifications">
+                        <span>🔔</span>
+                        <span class="badge"></span>
+                    </div>
+                    <div class="user-profile">
+                        <div class="avatar">JD</div>
+                        <div class="user-info">
+                            <div class="user-name">John Doe</div>
+                            <div class="user-role">Procurement Manager</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page-content active">
+                    <div class="dashboard-header">
+                        <h1>Supply Chain Dashboard</h1>
+                        <p>Overview of your supply chain operations</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Active Suppliers</div>
+                                <div class="stat-icon">🏭</div>
+                            </div>
+                            <div class="stat-value" id="statSuppliers">0</div>
+                            <div class="stat-change">+12% from last month</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Purchase Orders</div>
+                                <div class="stat-icon">📋</div>
+                            </div>
+                            <div class="stat-value" id="statPOs">0</div>
+                            <div class="stat-change">+8% from last month</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Inventory Items</div>
+                                <div class="stat-icon">📦</div>
+                            </div>
+                            <div class="stat-value" id="statInventory">0</div>
+                            <div class="stat-change">+5% from last month</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <div class="stat-title">Pending Receipts</div>
+                                <div class="stat-icon">📥</div>
+                            </div>
+                            <div class="stat-value" id="statReceipts">0</div>
+                            <div class="stat-change">+3 from yesterday</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Quick Actions</div>
+                        </div>
+                        <div class="quick-actions">
+                            <button onclick="showPage('suppliers')">
+                                <span>➕</span> Register Supplier
+                            </button>
+                            <button onclick="showPage('purchase-orders')" class="secondary">
+                                <span>📋</span> Create PO
+                            </button>
+                            <button onclick="showPage('receiving')" class="secondary">
+                                <span>📥</span> Process Receipt
+                            </button>
+                            <button onclick="showPage('inventory')" class="secondary">
+                                <span>📦</span> Manage Inventory
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Suppliers Page -->
+                <div id="suppliers" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Supplier Management</h1>
+                        <p>Manage your supplier network and performance</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Register New Supplier</div>
+                        </div>
+                        <form id="supplierForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Supplier ID *</label>
+                                    <input type="text" id="supplierId" required placeholder="SUP-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Company Name *</label>
+                                    <input type="text" id="supplierName" required placeholder="AutoParts Co.">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contact Email</label>
+                                    <input type="email" id="supplierContact" placeholder="contact@autoparts.com">
+                                </div>
+                                <div class="form-group">
+                                    <label>Lead Time (Days)</label>
+                                    <input type="number" id="leadTime" placeholder="7">
+                                </div>
+                                <div class="form-group">
+                                    <label>Certifications</label>
+                                    <input type="text" id="certifications" placeholder="ISO 9001, IATF 16949">
+                                </div>
+                            </div>
+                            <button type="submit">Register Supplier</button>
+                            <button type="button" class="secondary" onclick="listSuppliers()">View All Suppliers</button>
+                        </form>
+                        <div id="supplierResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Supplier Performance Metrics</div>
+                        </div>
+                        <form id="performanceForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Supplier ID *</label>
+                                    <input type="text" id="perfSupplierId" required placeholder="SUP-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>On-Time Delivery %</label>
+                                    <input type="number" step="0.01" id="onTimeDelivery" placeholder="95.5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Defect Rate %</label>
+                                    <input type="number" step="0.01" id="defectRate" placeholder="2.0">
+                                </div>
+                            </div>
+                            <button type="submit">Update Performance</button>
+                        </form>
+                        <div id="performanceResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Inventory Page -->
+                <div id="inventory" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Inventory Management</h1>
+                        <p>Track and manage automotive parts inventory</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Inventory Query</div>
+                        </div>
+                        <form id="inventoryQueryForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="queryPartId" required placeholder="P-123">
+                                </div>
+                            </div>
+                            <button type="submit">Query Inventory</button>
+                        </form>
+                        <div id="inventoryQueryResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Inventory Adjustment</div>
+                        </div>
+                        <form id="inventoryAdjustForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Adjustment ID *</label>
+                                    <input type="text" id="adjustmentId" required placeholder="ADJ-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="adjustPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Adjustment (+/-) *</label>
+                                    <input type="number" id="delta" required placeholder="10 or -5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Reason</label>
+                                    <input type="text" id="reason" placeholder="QC failed - scrapped">
+                                </div>
+                                <div class="form-group">
+                                    <label>Lot Number</label>
+                                    <input type="text" id="lotNumber" placeholder="LOT-445">
+                                </div>
+                            </div>
+                            <button type="submit">Adjust Inventory</button>
+                        </form>
+                        <div id="inventoryAdjustResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Purchase Orders Page -->
+                <div id="purchase-orders" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Purchase Order Management</h1>
+                        <p>Create and manage purchase orders for automotive parts</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Create Purchase Order</div>
+                        </div>
+                        <form id="poForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>PO ID *</label>
+                                    <input type="text" id="poId" required placeholder="PO-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Supplier ID *</label>
+                                    <input type="text" id="poSupplierId" required placeholder="SUP-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="poPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity *</label>
+                                    <input type="number" id="poQuantity" required placeholder="100">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select id="poStatus">
+                                        <option value="CREATED">CREATED</option>
+                                        <option value="APPROVED">APPROVED</option>
+                                        <option value="CANCELLED">CANCELLED</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit">Create Purchase Order</button>
+                        </form>
+                        <div id="poResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Receiving Page -->
+                <div id="receiving" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Goods Receiving</h1>
+                        <p>Process received goods and generate GRN</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Match Receipt & Generate GRN</div>
+                        </div>
+                        <form id="grnForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>PO ID *</label>
+                                    <input type="text" id="grnPoId" required placeholder="PO-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Received Quantity *</label>
+                                    <input type="number" id="receivedQty" required placeholder="95">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inspected Quantity *</label>
+                                    <input type="number" id="inspectedQty" required placeholder="95">
+                                </div>
+                            </div>
+                            <button type="submit">Match Receipt & Generate GRN</button>
+                        </form>
+                        <div id="grnResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Goods Receipt</div>
+                        </div>
+                        <form id="goodsReceiptForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>GRN ID *</label>
+                                    <input type="text" id="goodsReceiptGrnId" required placeholder="GRN-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>ASN ID</label>
+                                    <input type="text" id="goodsReceiptAsnId" placeholder="ASN-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>PO ID *</label>
+                                    <input type="text" id="goodsReceiptPoId" required placeholder="PO-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="goodsReceiptPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Received Quantity *</label>
+                                    <input type="number" id="goodsReceiptQty" required placeholder="100">
+                                </div>
+                                <div class="form-group">
+                                    <label>Lot Number</label>
+                                    <input type="text" id="goodsReceiptLot" placeholder="LOT-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inspector</label>
+                                    <input type="text" id="goodsReceiptInspector" placeholder="inspector.name">
+                                </div>
+                            </div>
+                            <button type="submit">Process Goods Receipt</button>
+                        </form>
+                        <div id="goodsReceiptResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Forecasting Page -->
+                <div id="forecasting" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Demand Forecasting & Planning</h1>
+                        <p>Predict demand and plan replenishment</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Demand Forecasting ML API</div>
+                        </div>
+                        <form id="forecastForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="forecastPartId" required placeholder="P-123">
+                                </div>
+                            </div>
+                            <button type="submit">Generate Forecast</button>
+                            <button type="button" class="secondary" onclick="explainForecast()">Explain Forecast</button>
+                        </form>
+                        <div id="forecastResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Replenishment Planner</div>
+                        </div>
+                        <form id="replenishmentForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="replenishPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Policy</label>
+                                    <select id="replenishPolicy">
+                                        <option value="EOQ">EOQ</option>
+                                        <option value="JIT">JIT</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit">Get Replenishment Plan</button>
+                        </form>
+                        <div id="replenishmentResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Reorder Alert</div>
+                        </div>
+                        <form id="alertForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="alertPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Current Quantity *</label>
+                                    <input type="number" id="currentQty" required placeholder="50">
+                                </div>
+                                <div class="form-group">
+                                    <label>Threshold *</label>
+                                    <input type="number" id="threshold" required placeholder="100">
+                                </div>
+                            </div>
+                            <button type="submit">Check Low Stock Alert</button>
+                        </form>
+                        <div id="alertResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Quality Control Page -->
+                <div id="quality" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Quality Control & Inspection</h1>
+                        <p>Manage quality inspections and sampling</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">QC Inspection</div>
+                        </div>
+                        <form id="qcInspectionForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Inspection ID *</label>
+                                    <input type="text" id="qcInspectionId" required placeholder="QC-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>GRN ID</label>
+                                    <input type="text" id="qcGrnId" placeholder="GRN-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="qcPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Lot Number</label>
+                                    <input type="text" id="qcLot" placeholder="LOT-445">
+                                </div>
+                                <div class="form-group">
+                                    <label>Inspector</label>
+                                    <input type="text" id="qcInspector" placeholder="inspector.javed">
+                                </div>
+                                <div class="form-group">
+                                    <label>Result *</label>
+                                    <select id="qcResult" required>
+                                        <option value="PASS">PASS</option>
+                                        <option value="FAIL">FAIL</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Sample Size</label>
+                                    <input type="number" id="qcSampleSize" placeholder="10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Failed Quantity</label>
+                                    <input type="number" id="qcFailedQty" placeholder="3">
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea id="qcNotes" placeholder="Inspection notes"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit">Submit QC Inspection</button>
+                            <button type="button" class="secondary" onclick="getQCSamplingPlan()">Get Sampling Plan</button>
+                        </form>
+                        <div id="qcInspectionResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Orders Page -->
+                <div id="orders" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Order Management & Fulfillment</h1>
+                        <p>Create and manage customer orders</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Order Management</div>
+                        </div>
+                        <form id="orderForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Customer Name *</label>
+                                    <input type="text" id="orderCustomer" required placeholder="ABC Motors">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part</label>
+                                    <input type="text" id="orderPart" placeholder="Engine Oil">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" id="orderQty" placeholder="10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Expected Delivery Date</label>
+                                    <input type="date" id="orderDeliveryDate">
+                                </div>
+                            </div>
+                            <button type="submit">Create Order</button>
+                        </form>
+                        <div id="orderResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Fulfillment Confirmation</div>
+                        </div>
+                        <form id="fulfillmentForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Order ID *</label>
+                                    <input type="number" id="fulfillOrderId" required placeholder="501">
+                                </div>
+                                <div class="form-group">
+                                    <label>Event *</label>
+                                    <select id="fulfillEvent" required>
+                                        <option value="picked">Picked</option>
+                                        <option value="packed">Packed</option>
+                                        <option value="shipped">Shipped</option>
+                                        <option value="invoiced">Invoiced</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit">Confirm Fulfillment</button>
+                        </form>
+                        <div id="fulfillmentResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Pick List & Task</div>
+                        </div>
+                        <form id="pickListForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Order ID *</label>
+                                    <input type="number" id="pickListOrderId" required placeholder="501">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part</label>
+                                    <input type="text" id="pickListPart" placeholder="Brake Pad">
+                                </div>
+                                <div class="form-group">
+                                    <label>Bin Location</label>
+                                    <input type="text" id="pickListBin" placeholder="A12">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity</label>
+                                    <input type="number" id="pickListQty" placeholder="4">
+                                </div>
+                            </div>
+                            <button type="submit">Create Pick List</button>
+                        </form>
+                        <div id="pickListResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Packing & Labeling</div>
+                        </div>
+                        <form id="packingForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Order ID *</label>
+                                    <input type="number" id="packingOrderId" required placeholder="501">
+                                </div>
+                                <div class="form-group">
+                                    <label>Box ID</label>
+                                    <input type="text" id="packingBoxId" placeholder="BX-101">
+                                </div>
+                                <div class="form-group">
+                                    <label>Dimensions</label>
+                                    <input type="text" id="packingDimensions" placeholder="20x15x10">
+                                </div>
+                                <div class="form-group">
+                                    <label>Weight</label>
+                                    <input type="text" id="packingWeight" placeholder="5kg">
+                                </div>
+                            </div>
+                            <button type="submit">Generate Packing Labels</button>
+                        </form>
+                        <div id="packingResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Shipments Page -->
+                <div id="shipments" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Shipment Management & Logistics</h1>
+                        <p>Schedule shipments and manage carriers</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Shipment Scheduling</div>
+                        </div>
+                        <form id="shipmentForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="shipmentPartId" required placeholder="P-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity *</label>
+                                    <input type="number" id="shipmentQty" required placeholder="50">
+                                </div>
+                                <div class="form-group">
+                                    <label>Destination *</label>
+                                    <input type="text" id="shipmentDestination" required placeholder="Karachi Plant">
+                                </div>
+                                <div class="form-group">
+                                    <label>Carrier *</label>
+                                    <input type="text" id="shipmentCarrier" required placeholder="MoverX">
+                                </div>
+                                <div class="form-group">
+                                    <label>Ship Date</label>
+                                    <input type="date" id="shipmentDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Estimated Days</label>
+                                    <input type="number" id="shipmentDays" placeholder="3">
+                                </div>
+                                <div class="form-group">
+                                    <label>Weight (kg)</label>
+                                    <input type="number" step="0.01" id="shipmentWeight" placeholder="120.5">
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea id="shipmentNotes" placeholder="Handle with care"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit">Schedule Shipment</button>
+                        </form>
+                        <div id="shipmentResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Carrier Rates & Routing</div>
+                        </div>
+                        <form id="carrierRatesForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>From *</label>
+                                    <input type="text" id="ratesFrom" required placeholder="Karachi">
+                                </div>
+                                <div class="form-group">
+                                    <label>To *</label>
+                                    <input type="text" id="ratesTo" required placeholder="Lahore">
+                                </div>
+                                <div class="form-group">
+                                    <label>Weight (kg)</label>
+                                    <input type="number" step="0.01" id="ratesWeight" placeholder="120.5">
+                                </div>
+                            </div>
+                            <button type="submit">Get Carrier Rates</button>
+                        </form>
+                        <div id="carrierRatesResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Shipment Tracking / Proof-of-Delivery</div>
+                        </div>
+                        <form id="podForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Shipment ID *</label>
+                                    <input type="text" id="podShipmentId" required placeholder="SHP-1001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Delivered By</label>
+                                    <input type="text" id="podDeliveredBy" placeholder="John Smith">
+                                </div>
+                                <div class="form-group">
+                                    <label>Delivery Time</label>
+                                    <input type="datetime-local" id="podDeliveryTime">
+                                </div>
+                                <div class="form-group">
+                                    <label>POD URL</label>
+                                    <input type="text" id="podUrl" placeholder="https://eis.com/docs/pod_SHP1001.pdf">
+                                </div>
+                            </div>
+                            <button type="submit">Update POD</button>
+                        </form>
+                        <div id="podResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">ASN (Advance Shipment Notice)</div>
+                        </div>
+                        <form id="asnForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>ASN ID *</label>
+                                    <input type="text" id="asnId" required placeholder="ASN-20251101-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>PO ID *</label>
+                                    <input type="text" id="asnPoId" required placeholder="PO-8899">
+                                </div>
+                                <div class="form-group">
+                                    <label>Supplier ID *</label>
+                                    <input type="text" id="asnSupplierId" required placeholder="SUP-55">
+                                </div>
+                                <div class="form-group">
+                                    <label>ETA</label>
+                                    <input type="datetime-local" id="asnEta">
+                                </div>
+                                <div class="form-group">
+                                    <label>Carrier</label>
+                                    <input type="text" id="asnCarrier" placeholder="MoverX">
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea id="asnNotes" placeholder="Two pallets"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit">Create ASN</button>
+                        </form>
+                        <div id="asnResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Invoicing Page -->
+                <div id="invoicing" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Invoicing & Financial Management</h1>
+                        <p>Generate invoices and manage payments</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Invoice Generation</div>
+                        </div>
+                        <form id="invoiceForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Invoice ID *</label>
+                                    <input type="text" id="invoiceId" required placeholder="INV-789">
+                                </div>
+                                <div class="form-group">
+                                    <label>PO ID *</label>
+                                    <input type="text" id="invoicePoId" required placeholder="PO-456">
+                                </div>
+                                <div class="form-group">
+                                    <label>Supplier ID *</label>
+                                    <input type="text" id="invoiceSupplierId" required placeholder="SUP-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount *</label>
+                                    <input type="number" step="0.01" id="invoiceAmount" required placeholder="5000.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select id="invoiceStatus">
+                                        <option value="DRAFT">DRAFT</option>
+                                        <option value="SENT">SENT</option>
+                                        <option value="PAID">PAID</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit">Generate Invoice</button>
+                            <button type="button" class="secondary" onclick="getInvoice()">Get Invoice</button>
+                        </form>
+                        <div id="invoiceResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Invoice Matching (3-Way Match)</div>
+                        </div>
+                        <form id="invoiceMatchForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Invoice ID *</label>
+                                    <input type="text" id="matchInvoiceId" required placeholder="INV-456">
+                                </div>
+                                <div class="form-group">
+                                    <label>PO ID *</label>
+                                    <input type="text" id="matchPoId" required placeholder="PO-456">
+                                </div>
+                                <div class="form-group">
+                                    <label>GRN ID *</label>
+                                    <input type="text" id="matchGrnId" required placeholder="GRN-456">
+                                </div>
+                            </div>
+                            <button type="submit">Perform 3-Way Match</button>
+                        </form>
+                        <div id="invoiceMatchResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Credit / Refund Processing</div>
+                        </div>
+                        <form id="creditForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Invoice ID *</label>
+                                    <input type="text" id="creditInvoiceId" required placeholder="INV-456">
+                                </div>
+                                <div class="form-group">
+                                    <label>Amount *</label>
+                                    <input type="number" step="0.01" id="creditAmount" required placeholder="5000.00">
+                                </div>
+                                <div class="form-group">
+                                    <label>Reason</label>
+                                    <textarea id="creditReason" placeholder="Returned goods"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit">Process Credit</button>
+                            <button type="button" class="secondary" onclick="processRefund()">Process Refund</button>
+                        </form>
+                        <div id="creditResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">SLA / Delivery Promise</div>
+                        </div>
+                        <form id="slaForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Order ID *</label>
+                                    <input type="text" id="slaOrderId" required placeholder="ORD-789">
+                                </div>
+                                <div class="form-group">
+                                    <label>Promised Date *</label>
+                                    <input type="date" id="slaPromisedDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Actual Delivery Date</label>
+                                    <input type="date" id="slaActualDate">
+                                </div>
+                            </div>
+                            <button type="submit">Set Delivery Promise</button>
+                            <button type="button" class="secondary" onclick="getSLA()">Get SLA Status</button>
+                        </form>
+                        <div id="slaResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Returns & Recalls Page -->
+                <div id="returns-recalls" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Returns & Recalls Management</h1>
+                        <p>Manage customer returns and product recalls</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Return Authorization (RMA)</div>
+                        </div>
+                        <form id="rmaForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Customer ID *</label>
+                                    <input type="number" id="rmaCustomerId" required placeholder="101">
+                                </div>
+                                <div class="form-group">
+                                    <label>Part</label>
+                                    <input type="text" id="rmaPart" placeholder="Brake Pad">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity *</label>
+                                    <input type="number" id="rmaQty" required placeholder="2">
+                                </div>
+                                <div class="form-group">
+                                    <label>Reason</label>
+                                    <textarea id="rmaReason" placeholder="Defective part"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit">Authorize Return</button>
+                        </form>
+                        <div id="rmaResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Return Disposition</div>
+                        </div>
+                        <form id="returnDispositionForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="dispositionPartId" required placeholder="BP-100">
+                                </div>
+                                <div class="form-group">
+                                    <label>Quantity *</label>
+                                    <input type="number" id="dispositionQty" required placeholder="2">
+                                </div>
+                                <div class="form-group">
+                                    <label>Disposition *</label>
+                                    <select id="disposition" required>
+                                        <option value="restock">Restock</option>
+                                        <option value="repair">Repair</option>
+                                        <option value="scrap">Scrap</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <textarea id="dispositionNotes" placeholder="Minor scratches; reusable"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit">Process Disposition</button>
+                        </form>
+                        <div id="returnDispositionResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Recall Issuance</div>
+                        </div>
+                        <form id="recallForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Part ID *</label>
+                                    <input type="text" id="recallPartId" required placeholder="ST-300">
+                                </div>
+                                <div class="form-group">
+                                    <label>Reason *</label>
+                                    <textarea id="recallReason" required placeholder="Faulty steering component"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Lot Numbers (comma-separated)</label>
+                                    <input type="text" id="recallLots" placeholder="L2025-01, L2025-02">
+                                </div>
+                                <div class="form-group">
+                                    <label>Scope</label>
+                                    <input type="text" id="recallScope" placeholder="500 vehicles affected">
+                                </div>
+                            </div>
+                            <button type="submit">Issue Recall</button>
+                            <button type="button" class="secondary" onclick="traceRecall()">Trace Recall</button>
+                        </form>
+                        <div id="recallResponse" class="response"></div>
+                    </div>
+                </div>
+                
+                <!-- Reports Page -->
+                <div id="reports" class="page-content">
+                    <div class="dashboard-header">
+                        <h1>Reports & System Information</h1>
+                        <p>View supply chain reports and API information</p>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Audit & Event Log API</div>
+                        </div>
+                        <form id="auditForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Entity Type *</label>
+                                    <select id="auditEntityType" required>
+                                        <option value="PO">Purchase Order</option>
+                                        <option value="GRN">GRN</option>
+                                        <option value="Invoice">Invoice</option>
+                                        <option value="Supplier">Supplier</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Entity ID *</label>
+                                    <input type="text" id="auditEntityId" required placeholder="PO-123">
+                                </div>
+                                <div class="form-group">
+                                    <label>Event Type *</label>
+                                    <select id="auditEventType" required>
+                                        <option value="Created">Created</option>
+                                        <option value="Updated">Updated</option>
+                                        <option value="Deleted">Deleted</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>User ID</label>
+                                    <input type="text" id="auditUserId" placeholder="user.id">
+                                </div>
+                            </div>
+                            <button type="submit">Log Event</button>
+                            <button type="button" class="secondary" onclick="getAuditLogs()">View Audit Logs</button>
+                        </form>
+                        <div id="auditResponse" class="response"></div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">All API Endpoints</div>
+                        </div>
+                        <div class="quick-actions">
+                            <button onclick="showPage('suppliers')" class="secondary">
+                                <span>🏭</span> Suppliers API
+                            </button>
+                            <button onclick="showPage('inventory')" class="secondary">
+                                <span>📦</span> Inventory API
+                            </button>
+                            <button onclick="showPage('purchase-orders')" class="secondary">
+                                <span>📋</span> Purchase Orders API
+                            </button>
+                            <button onclick="showPage('forecasting')" class="secondary">
+                                <span>📈</span> Forecasting API
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const API_BASE = 'http://localhost:8080';
+        
+        // Safe form event listener attachment
+        function safeAddEventListener(formId, eventType, handler) {
+            const form = document.getElementById(formId);
+            if (form) {
+                form.addEventListener(eventType, handler);
+            } else {
+                console.warn(`Form with id '${formId}' not found`);
+            }
+        }
+
+        // Initialize all event listeners safely
+        function initializeEventListeners() {
+            // Supplier Forms
+            safeAddEventListener('supplierForm', 'submit', handleSupplierSubmit);
+            safeAddEventListener('performanceForm', 'submit', handlePerformanceSubmit);
+            
+            // Inventory Forms
+            safeAddEventListener('inventoryQueryForm', 'submit', handleInventoryQuery);
+            safeAddEventListener('inventoryAdjustForm', 'submit', handleInventoryAdjust);
+            
+            // Purchase Order Forms
+            safeAddEventListener('poForm', 'submit', handlePurchaseOrderSubmit);
+            safeAddEventListener('grnForm', 'submit', handleGRNSubmit);
+            
+            // Receiving Forms
+            safeAddEventListener('goodsReceiptForm', 'submit', handleGoodsReceiptSubmit);
+            
+            // Forecasting Forms
+            safeAddEventListener('forecastForm', 'submit', handleForecastSubmit);
+            safeAddEventListener('replenishmentForm', 'submit', handleReplenishmentSubmit);
+            safeAddEventListener('alertForm', 'submit', handleAlertSubmit);
+            
+            // Quality Control Forms
+            safeAddEventListener('qcInspectionForm', 'submit', handleQCInspectionSubmit);
+            
+            // Order Forms
+            safeAddEventListener('orderForm', 'submit', handleOrderSubmit);
+            safeAddEventListener('fulfillmentForm', 'submit', handleFulfillmentSubmit);
+            safeAddEventListener('pickListForm', 'submit', handlePickListSubmit);
+            safeAddEventListener('packingForm', 'submit', handlePackingSubmit);
+            
+            // Shipment Forms
+            safeAddEventListener('shipmentForm', 'submit', handleShipmentSubmit);
+            safeAddEventListener('carrierRatesForm', 'submit', handleCarrierRatesSubmit);
+            safeAddEventListener('podForm', 'submit', handlePODSubmit);
+            safeAddEventListener('asnForm', 'submit', handleASNSubmit);
+            
+            // Invoicing Forms
+            safeAddEventListener('invoiceForm', 'submit', handleInvoiceSubmit);
+            safeAddEventListener('invoiceMatchForm', 'submit', handleInvoiceMatchSubmit);
+            safeAddEventListener('creditForm', 'submit', handleCreditSubmit);
+            safeAddEventListener('slaForm', 'submit', handleSLASubmit);
+            
+            // Returns & Recalls Forms
+            safeAddEventListener('rmaForm', 'submit', handleRMASubmit);
+            safeAddEventListener('returnDispositionForm', 'submit', handleReturnDispositionSubmit);
+            safeAddEventListener('recallForm', 'submit', handleRecallSubmit);
+            
+            // Reports Forms
+            safeAddEventListener('auditForm', 'submit', handleAuditSubmit);
+        }
+
+        // Mobile menu functionality
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.toggle('mobile-open');
+            overlay.classList.toggle('active');
+        }
+
+        function closeMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.remove('mobile-open');
+            overlay.classList.remove('active');
+        }
+
+        // Sidebar toggle for desktop
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        function showPage(pageId) {
+            // Close mobile menu if open
+            closeMobileMenu();
+            
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add active to clicked nav link
+            event.target.closest('.nav-link').classList.add('active');
+            
+            // Load dashboard stats if dashboard page
+            if (pageId === 'dashboard') {
+                loadDashboardStats();
+            }
+        }
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Close mobile menu on window resize if it becomes desktop
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 1024) {
+                closeMobileMenu();
+            }
+        });
+
+        async function loadDashboardStats() {
+            try {
+                // Load suppliers count
+                const suppliersResponse = await fetch(`${API_BASE}/api/suppliers`);
+                if (suppliersResponse.ok) {
+                    const suppliers = await suppliersResponse.json();
+                    document.getElementById('statSuppliers').textContent = suppliers.length || 0;
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        function showResponse(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.warn(`Response element with id '${elementId}' not found`);
+                return;
+            }
+            
+            element.classList.add('show');
+            element.classList.remove('error', 'success');
+            element.classList.add(isError ? 'error' : 'success');
+            
+            if (isError) {
+                element.innerHTML = formatError(data);
+            } else {
+                element.innerHTML = formatSuccess(data);
+            }
+            
+            // Reload dashboard stats after successful operations
+            if (!isError && (elementId.includes('supplier') || elementId.includes('po'))) {
+                loadDashboardStats();
+            }
+        }
+        
+        function formatError(errorData) {
+            let errorMessage = 'An error occurred';
+            let errorDetails = null;
+            let errorType = 'Error';
+            
+            // Handle different error formats
+            if (typeof errorData === 'string') {
+                errorMessage = errorData;
+            } else if (errorData && errorData.error) {
+                errorMessage = errorData.error;
+                errorDetails = errorData;
+            } else if (errorData && errorData.message) {
+                errorMessage = errorData.message;
+                errorDetails = errorData;
+            } else if (errorData && typeof errorData === 'object') {
+                // Try to extract meaningful error message
+                if (errorData.error || errorData.message || errorData.details) {
+                    errorMessage = errorData.error || errorData.message || errorData.details;
+                } else {
+                    errorMessage = 'Operation failed';
+                }
+                errorDetails = errorData;
+            }
+            
+            // Check for common error types
+            if (errorMessage.includes('Connection') || errorMessage.includes('network') || errorMessage.includes('fetch')) {
+                errorType = 'Connection Error';
+                errorMessage = 'Unable to connect to the server. Please check your connection and ensure the server is running.';
+            } else if (errorMessage.includes('Database') || errorMessage.includes('SQL') || errorMessage.includes('JDBC')) {
+                errorType = 'Database Error';
+                errorMessage = 'Database connection failed. Please ensure the database is running and properly configured.';
+            } else if (errorMessage.includes('404') || errorMessage.includes('Not Found')) {
+                errorType = 'Not Found';
+                errorMessage = 'The requested resource was not found.';
+            } else if (errorMessage.includes('400') || errorMessage.includes('Bad Request')) {
+                errorType = 'Invalid Request';
+                errorMessage = 'The request is invalid. Please check your input and try again.';
+            } else if (errorMessage.includes('500') || errorMessage.includes('Internal Server')) {
+                errorType = 'Server Error';
+                errorMessage = 'An internal server error occurred. Please try again later.';
+            }
+            
+            let html = `
+                <div class="response-content">
+                    <div class="response-header">
+                        <span class="response-icon">⚠️</span>
+                        <span>${errorType}</span>
+                    </div>
+                    <div class="response-message">
+                        ${errorMessage}
+                    </div>
+            `;
+            
+            // Add details if available and not too long
+            if (errorDetails && typeof errorDetails === 'object' && Object.keys(errorDetails).length > 0) {
+                const detailsToShow = {};
+                for (const key in errorDetails) {
+                    if (key !== 'error' && key !== 'message' && errorDetails[key] !== null && errorDetails[key] !== undefined) {
+                        detailsToShow[key] = errorDetails[key];
+                    }
+                }
+                
+                if (Object.keys(detailsToShow).length > 0) {
+                    html += `
+                        <div class="response-details">
+                            <div class="response-details-title">Error Details:</div>
+                            <ul class="response-details-list">
+                    `;
+                    for (const key in detailsToShow) {
+                        const value = typeof detailsToShow[key] === 'object' 
+                            ? JSON.stringify(detailsToShow[key], null, 2) 
+                            : String(detailsToShow[key]);
+                        html += `
+                            <li>
+                                <span class="response-details-key">${key}:</span>
+                                <span class="response-details-value">${value}</span>
+                            </li>
+                        `;
+                    }
+                    html += `
+                            </ul>
+                        </div>
+                    `;
+                }
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+        
+        function formatSuccess(data) {
+            let message = 'Operation completed successfully!';
+            let details = null;
+            
+            if (typeof data === 'string') {
+                message = data;
+            } else if (data && data.message) {
+                message = data.message;
+                details = data;
+            } else if (data && typeof data === 'object') {
+                details = data;
+                
+                // Try to extract meaningful success message
+                if (data.status && data.status.includes('success')) {
+                    message = 'Operation completed successfully!';
+                } else if (data.id || data.orderId || data.invoiceId || data.rmaId || data.recallId) {
+                    message = 'Record created successfully!';
+                }
+            }
+            
+            let html = `
+                <div class="response-content">
+                    <div class="response-header">
+                        <span class="response-icon">✅</span>
+                        <span>Success</span>
+                    </div>
+                    <div class="response-message">
+                        ${message}
+                    </div>
+            `;
+            
+            // Show important details
+            if (details && typeof details === 'object' && Object.keys(details).length > 0) {
+                const importantFields = ['id', 'supplierId', 'poId', 'invoiceId', 'grnId', 'orderId', 'rmaId', 'recallId', 
+                                        'status', 'message', 'partId', 'quantity', 'amount'];
+                const detailsToShow = {};
+                
+                for (const key in details) {
+                    if (importantFields.includes(key) && details[key] !== null && details[key] !== undefined) {
+                        detailsToShow[key] = details[key];
+                    }
+                }
+                
+                // If we didn't find important fields, show first few fields
+                if (Object.keys(detailsToShow).length === 0) {
+                    let count = 0;
+                    for (const key in details) {
+                        if (count < 5 && details[key] !== null && details[key] !== undefined) {
+                            detailsToShow[key] = details[key];
+                            count++;
+                        }
+                    }
+                }
+                
+                if (Object.keys(detailsToShow).length > 0) {
+                    html += `
+                        <div class="response-details">
+                            <div class="response-details-title">Details:</div>
+                            <ul class="response-details-list">
+                    `;
+                    for (const key in detailsToShow) {
+                        let value = detailsToShow[key];
+                        if (typeof value === 'object') {
+                            value = JSON.stringify(value, null, 2);
+                        } else {
+                            value = String(value);
+                        }
+                        // Truncate long values
+                        if (value.length > 100) {
+                            value = value.substring(0, 100) + '...';
+                        }
+                        html += `
+                            <li>
+                                <span class="response-details-key">${key}:</span>
+                                <span class="response-details-value">${value}</span>
+                            </li>
+                        `;
+                    }
+                    html += `
+                            </ul>
+                        </div>
+                    `;
+                    
+                    // Show full JSON in expandable section if needed
+                    if (Object.keys(details).length > Object.keys(detailsToShow).length) {
+                        html += `
+                            <details style="margin-top: 12px;">
+                                <summary style="cursor: pointer; color: var(--bright-cyan); font-size: 0.9em; margin-bottom: 8px;">
+                                    View Full Response
+                                </summary>
+                                <pre>${JSON.stringify(details, null, 2)}</pre>
+                            </details>
+                        `;
+                    }
+                }
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+        
+        async function handleApiCall(url, options, responseElementId, onSuccess) {
+            const element = document.getElementById(responseElementId);
+            const submitButton = options.submitButton;
+            
+            try {
+                // Show loading state
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    const originalText = submitButton.innerHTML;
+                    submitButton.innerHTML = '<span class="loading-spinner"></span> Processing...';
+                    
+                    // Re-enable button after timeout (safety measure)
+                    setTimeout(() => {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    }, 30000);
+                }
+                
+                const response = await fetch(url, options.fetchOptions || {});
+                
+                let result;
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    result = await response.json();
+                } else {
+                    result = { message: await response.text() };
+                }
+                
+                if (!response.ok) {
+                    showResponse(responseElementId, result, true);
+                } else {
+                    showResponse(responseElementId, result, false);
+                    if (onSuccess) onSuccess(result);
+                }
+            } catch (error) {
+                let errorMessage = error.message;
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    errorMessage = 'Unable to connect to the server. Please ensure the server is running at http://localhost:4000';
+                }
+                showResponse(responseElementId, { error: errorMessage, type: 'Network Error' }, true);
+            } finally {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = submitButton.getAttribute('data-original-text') || submitButton.textContent;
+                }
+            }
+        }
+
+        // Form Handler Functions
+        async function handleSupplierSubmit(e) {
+            e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.setAttribute('data-original-text', submitButton.innerHTML);
+            }
+            
+            const data = {
+                supplierId: document.getElementById('supplierId').value,
+                name: document.getElementById('supplierName').value,
+                contact: document.getElementById('supplierContact').value,
+                leadTimeDays: parseInt(document.getElementById('leadTime').value) || null,
+                certifications: document.getElementById('certifications').value
+            };
+            
+            await handleApiCall(
+                `${API_BASE}/api/suppliers`,
+                {
+                    fetchOptions: {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    },
+                    submitButton: submitButton
+                },
+                'supplierResponse',
+                (result) => {
+                    if (result && !result.error) {
+                        document.getElementById('supplierForm').reset();
+                    }
+                }
+            );
+        }
+        
+        async function handlePerformanceSubmit(e) {
+            e.preventDefault();
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.setAttribute('data-original-text', submitButton.innerHTML);
+            }
+            
+            const data = {
+                supplierId: document.getElementById('perfSupplierId').value,
+                onTimeDeliveryPercent: parseFloat(document.getElementById('onTimeDelivery').value),
+                defectRate: parseFloat(document.getElementById('defectRate').value)
+            };
+            
+            await handleApiCall(
+                `${API_BASE}/api/suppliers/performance/event`,
+                {
+                    fetchOptions: {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    },
+                    submitButton: submitButton
+                },
+                'performanceResponse',
+                (result) => {
+                    if (result && !result.error) {
+                        document.getElementById('performanceForm').reset();
+                    }
+                }
+            );
+        }
+
+        async function handleInventoryQuery(e) {
+            e.preventDefault();
+            const partId = document.getElementById('queryPartId').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/inventory/${partId}`);
+                const result = await response.json();
+                showResponse('inventoryQueryResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('inventoryQueryResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleInventoryAdjust(e) {
+            e.preventDefault();
+            const data = {
+                adjustmentId: document.getElementById('adjustmentId').value,
+                partId: document.getElementById('adjustPartId').value,
+                delta: parseInt(document.getElementById('delta').value),
+                reason: document.getElementById('reason').value,
+                lot: document.getElementById('lotNumber').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/inventory/adjust`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('inventoryAdjustResponse', result, !response.ok);
+                if (response.ok) {
+                    document.getElementById('inventoryAdjustForm').reset();
+                }
+            } catch (error) {
+                showResponse('inventoryAdjustResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handlePurchaseOrderSubmit(e) {
+            e.preventDefault();
+            const data = {
+                poId: document.getElementById('poId').value,
+                supplierId: document.getElementById('poSupplierId').value,
+                partId: document.getElementById('poPartId').value,
+                quantity: parseInt(document.getElementById('poQuantity').value),
+                status: document.getElementById('poStatus').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/purchase-orders`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('poResponse', result, !response.ok);
+                if (response.ok) {
+                    document.getElementById('poForm').reset();
+                }
+            } catch (error) {
+                showResponse('poResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleGRNSubmit(e) {
+            e.preventDefault();
+            const poId = document.getElementById('grnPoId').value;
+            const data = {
+                receivedQty: parseInt(document.getElementById('receivedQty').value),
+                inspectedQty: parseInt(document.getElementById('inspectedQty').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/purchase-orders/${poId}/match-receipt`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('grnResponse', result, !response.ok);
+                if (response.ok) {
+                    document.getElementById('grnForm').reset();
+                }
+            } catch (error) {
+                showResponse('grnResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleGoodsReceiptSubmit(e) {
+            e.preventDefault();
+            const data = {
+                grnId: document.getElementById('goodsReceiptGrnId').value,
+                asnId: document.getElementById('goodsReceiptAsnId').value,
+                poId: document.getElementById('goodsReceiptPoId').value,
+                lines: [{
+                    partId: document.getElementById('goodsReceiptPartId').value,
+                    receivedQty: parseInt(document.getElementById('goodsReceiptQty').value) || 0,
+                    lot: document.getElementById('goodsReceiptLot').value,
+                    condition: 'GOOD'
+                }],
+                inspector: document.getElementById('goodsReceiptInspector').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/receipts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('goodsReceiptResponse', result, !response.ok);
+                if (response.ok) document.getElementById('goodsReceiptForm').reset();
+            } catch (error) {
+                showResponse('goodsReceiptResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleForecastSubmit(e) {
+            e.preventDefault();
+            const data = { partId: document.getElementById('forecastPartId').value };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/forecast`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('forecastResponse', result, !response.ok);
+                if (response.ok) document.getElementById('forecastForm').reset();
+            } catch (error) {
+                showResponse('forecastResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleReplenishmentSubmit(e) {
+            e.preventDefault();
+            const partId = document.getElementById('replenishPartId').value;
+            const policy = document.getElementById('replenishPolicy').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/replenish/${partId}?policy=${policy}`);
+                const result = await response.json();
+                showResponse('replenishmentResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('replenishmentResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleAlertSubmit(e) {
+            e.preventDefault();
+            const data = {
+                partId: document.getElementById('alertPartId').value,
+                currentQty: parseInt(document.getElementById('currentQty').value),
+                threshold: parseInt(document.getElementById('threshold').value)
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/alerts/low-stock`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('alertResponse', result, !response.ok);
+                if (response.ok) document.getElementById('alertForm').reset();
+            } catch (error) {
+                showResponse('alertResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleQCInspectionSubmit(e) {
+            e.preventDefault();
+            const data = {
+                inspectionId: document.getElementById('qcInspectionId').value,
+                grnId: document.getElementById('qcGrnId').value,
+                partId: document.getElementById('qcPartId').value,
+                lot: document.getElementById('qcLot').value,
+                inspector: document.getElementById('qcInspector').value,
+                result: document.getElementById('qcResult').value,
+                sampleSize: parseInt(document.getElementById('qcSampleSize').value) || 10,
+                failedQty: parseInt(document.getElementById('qcFailedQty').value) || 0,
+                notes: document.getElementById('qcNotes').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/qc/inspection`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('qcInspectionResponse', result, !response.ok);
+                if (response.ok) document.getElementById('qcInspectionForm').reset();
+            } catch (error) {
+                showResponse('qcInspectionResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleOrderSubmit(e) {
+            e.preventDefault();
+            const data = {
+                customer: document.getElementById('orderCustomer').value,
+                parts: [{ part: document.getElementById('orderPart').value, quantity: parseInt(document.getElementById('orderQty').value) || 0 }],
+                expectedDelivery: document.getElementById('orderDeliveryDate').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/orders/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('orderResponse', result, !response.ok);
+                if (response.ok) document.getElementById('orderForm').reset();
+            } catch (error) {
+                showResponse('orderResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleFulfillmentSubmit(e) {
+            e.preventDefault();
+            const data = {
+                orderId: parseInt(document.getElementById('fulfillOrderId').value),
+                event: document.getElementById('fulfillEvent').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/fulfillment/confirm`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('fulfillmentResponse', result, !response.ok);
+                if (response.ok) document.getElementById('fulfillmentForm').reset();
+            } catch (error) {
+                showResponse('fulfillmentResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handlePickListSubmit(e) {
+            e.preventDefault();
+            const data = {
+                orderId: parseInt(document.getElementById('pickListOrderId').value),
+                tasks: [{
+                    part: document.getElementById('pickListPart').value,
+                    bin: document.getElementById('pickListBin').value,
+                    quantity: parseInt(document.getElementById('pickListQty').value) || 0
+                }]
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/picklists/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('pickListResponse', result, !response.ok);
+                if (response.ok) document.getElementById('pickListForm').reset();
+            } catch (error) {
+                showResponse('pickListResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handlePackingSubmit(e) {
+            e.preventDefault();
+            const data = {
+                orderId: parseInt(document.getElementById('packingOrderId').value),
+                boxes: [{
+                    boxId: document.getElementById('packingBoxId').value,
+                    dimensions: document.getElementById('packingDimensions').value,
+                    weight: document.getElementById('packingWeight').value
+                }]
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/packing/label`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('packingResponse', result, !response.ok);
+                if (response.ok) document.getElementById('packingForm').reset();
+            } catch (error) {
+                showResponse('packingResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleShipmentSubmit(e) {
+            e.preventDefault();
+            const data = {
+                partId: document.getElementById('shipmentPartId').value,
+                qty: parseInt(document.getElementById('shipmentQty').value),
+                destination: document.getElementById('shipmentDestination').value,
+                carrier: document.getElementById('shipmentCarrier').value,
+                shipDate: document.getElementById('shipmentDate').value || new Date().toISOString().split('T')[0],
+                estimatedDays: parseInt(document.getElementById('shipmentDays').value) || 3,
+                weightKg: parseFloat(document.getElementById('shipmentWeight').value) || 0,
+                notes: document.getElementById('shipmentNotes').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/shipments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('shipmentResponse', result, !response.ok);
+                if (response.ok) document.getElementById('shipmentForm').reset();
+            } catch (error) {
+                showResponse('shipmentResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleCarrierRatesSubmit(e) {
+            e.preventDefault();
+            const from = document.getElementById('ratesFrom').value;
+            const to = document.getElementById('ratesTo').value;
+            const weightKg = document.getElementById('ratesWeight').value || 0;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/rates?from=${from}&to=${to}&weightKg=${weightKg}`);
+                const result = await response.json();
+                showResponse('carrierRatesResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('carrierRatesResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handlePODSubmit(e) {
+            e.preventDefault();
+            const data = {
+                shipmentId: document.getElementById('podShipmentId').value,
+                deliveredBy: document.getElementById('podDeliveredBy').value,
+                deliveryTime: document.getElementById('podDeliveryTime').value || new Date().toISOString(),
+                podUrl: document.getElementById('podUrl').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/shipments/pod`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('podResponse', result, !response.ok);
+                if (response.ok) document.getElementById('podForm').reset();
+            } catch (error) {
+                showResponse('podResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleASNSubmit(e) {
+            e.preventDefault();
+            const data = {
+                asnId: document.getElementById('asnId').value,
+                poId: document.getElementById('asnPoId').value,
+                supplierId: document.getElementById('asnSupplierId').value,
+                eta: document.getElementById('asnEta').value ? new Date(document.getElementById('asnEta').value).toISOString() : null,
+                carrier: document.getElementById('asnCarrier').value,
+                notes: document.getElementById('asnNotes').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/asn`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('asnResponse', result, !response.ok);
+                if (response.ok) document.getElementById('asnForm').reset();
+            } catch (error) {
+                showResponse('asnResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleInvoiceSubmit(e) {
+            e.preventDefault();
+            const data = {
+                invoiceId: document.getElementById('invoiceId').value,
+                poId: document.getElementById('invoicePoId').value,
+                supplierId: document.getElementById('invoiceSupplierId').value,
+                amount: parseFloat(document.getElementById('invoiceAmount').value),
+                status: document.getElementById('invoiceStatus').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/invoices`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('invoiceResponse', result, !response.ok);
+                if (response.ok) document.getElementById('invoiceForm').reset();
+            } catch (error) {
+                showResponse('invoiceResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleInvoiceMatchSubmit(e) {
+            e.preventDefault();
+            const invoiceId = document.getElementById('matchInvoiceId').value;
+            const data = {
+                poId: document.getElementById('matchPoId').value,
+                grnId: document.getElementById('matchGrnId').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/invoices/${invoiceId}/match`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('invoiceMatchResponse', result, !response.ok);
+                if (response.ok) document.getElementById('invoiceMatchForm').reset();
+            } catch (error) {
+                showResponse('invoiceMatchResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleCreditSubmit(e) {
+            e.preventDefault();
+            const data = {
+                invoiceId: document.getElementById('creditInvoiceId').value,
+                amount: parseFloat(document.getElementById('creditAmount').value),
+                reason: document.getElementById('creditReason').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/credit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('creditResponse', result, !response.ok);
+                if (response.ok) document.getElementById('creditForm').reset();
+            } catch (error) {
+                showResponse('creditResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleSLASubmit(e) {
+            e.preventDefault();
+            const data = {
+                orderId: document.getElementById('slaOrderId').value,
+                promisedDate: document.getElementById('slaPromisedDate').value,
+                actualDeliveryDate: document.getElementById('slaActualDate').value || null
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/promise`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('slaResponse', result, !response.ok);
+                if (response.ok) document.getElementById('slaForm').reset();
+            } catch (error) {
+                showResponse('slaResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleRMASubmit(e) {
+            e.preventDefault();
+            const data = {
+                customerId: parseInt(document.getElementById('rmaCustomerId').value),
+                part: document.getElementById('rmaPart').value,
+                qty: parseInt(document.getElementById('rmaQty').value),
+                reason: document.getElementById('rmaReason').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/returns/authorize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('rmaResponse', result, !response.ok);
+                if (response.ok) document.getElementById('rmaForm').reset();
+            } catch (error) {
+                showResponse('rmaResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleReturnDispositionSubmit(e) {
+            e.preventDefault();
+            const data = {
+                partId: document.getElementById('dispositionPartId').value,
+                qty: parseInt(document.getElementById('dispositionQty').value),
+                disposition: document.getElementById('disposition').value,
+                notes: document.getElementById('dispositionNotes').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/returns/disposition`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('returnDispositionResponse', result, !response.ok);
+                if (response.ok) document.getElementById('returnDispositionForm').reset();
+            } catch (error) {
+                showResponse('returnDispositionResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleRecallSubmit(e) {
+            e.preventDefault();
+            const lots = document.getElementById('recallLots').value.split(',').map(l => l.trim()).filter(l => l);
+            const data = {
+                partId: document.getElementById('recallPartId').value,
+                reason: document.getElementById('recallReason').value,
+                lots: lots,
+                scope: document.getElementById('recallScope').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/recalls/issue`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('recallResponse', result, !response.ok);
+                if (response.ok) document.getElementById('recallForm').reset();
+            } catch (error) {
+                showResponse('recallResponse', { error: error.message }, true);
+            }
+        }
+
+        async function handleAuditSubmit(e) {
+            e.preventDefault();
+            const data = {
+                entity: document.getElementById('auditEntityType').value,
+                entityId: document.getElementById('auditEntityId').value,
+                eventType: document.getElementById('auditEventType').value,
+                user_id: document.getElementById('auditUserId').value || 'system'
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/audit/event`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('auditResponse', result, !response.ok);
+                if (response.ok) document.getElementById('auditForm').reset();
+            } catch (error) {
+                showResponse('auditResponse', { error: error.message }, true);
+            }
+        }
+
+        // Additional functions
+        async function listSuppliers() {
+            await handleApiCall(
+                `${API_BASE}/api/suppliers`,
+                { fetchOptions: { method: 'GET' } },
+                'supplierResponse'
+            );
+        }
+
+        async function explainForecast() {
+            const partId = document.getElementById('forecastPartId').value;
+            if (!partId) {
+                showResponse('forecastResponse', { error: 'Please enter Part ID first' }, true);
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/api/forecast/${partId}/explain`);
+                const result = await response.json();
+                showResponse('forecastResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('forecastResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getQCSamplingPlan() {
+            const partId = document.getElementById('qcPartId').value;
+            if (!partId) {
+                showResponse('qcInspectionResponse', { error: 'Please enter Part ID first' }, true);
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/qc/plan/${partId}`);
+                const result = await response.json();
+                showResponse('qcInspectionResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('qcInspectionResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getInvoice() {
+            const invoiceId = document.getElementById('invoiceId').value;
+            if (!invoiceId) {
+                showResponse('invoiceResponse', { error: 'Please enter Invoice ID first' }, true);
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/api/invoices/${invoiceId}`);
+                const result = await response.json();
+                showResponse('invoiceResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('invoiceResponse', { error: error.message }, true);
+            }
+        }
+
+        async function processRefund() {
+            const data = {
+                invoiceId: document.getElementById('creditInvoiceId').value,
+                amount: parseFloat(document.getElementById('creditAmount').value),
+                reason: document.getElementById('creditReason').value
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/refund`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                showResponse('creditResponse', result, !response.ok);
+                if (response.ok) document.getElementById('creditForm').reset();
+            } catch (error) {
+                showResponse('creditResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getSLA() {
+            const orderId = document.getElementById('slaOrderId').value;
+            if (!orderId) {
+                showResponse('slaResponse', { error: 'Please enter Order ID first' }, true);
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/api/sla/${orderId}`);
+                const result = await response.json();
+                showResponse('slaResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('slaResponse', { error: error.message }, true);
+            }
+        }
+
+        async function traceRecall() {
+            const partId = document.getElementById('recallPartId').value;
+            if (!partId) {
+                showResponse('recallResponse', { error: 'Please enter Part ID first' }, true);
+                return;
+            }
+            const lots = document.getElementById('recallLots').value.split(',').map(l => l.trim()).filter(l => l);
+            const lot = lots.length > 0 ? lots[0] : null;
+            
+            try {
+                const url = lot ? 
+                    `${API_BASE}/api/trace/recall?partId=${partId}&lot=${lot}` :
+                    `${API_BASE}/api/trace/recall?partId=${partId}`;
+                const response = await fetch(url);
+                const result = await response.json();
+                showResponse('recallResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('recallResponse', { error: error.message }, true);
+            }
+        }
+
+        async function getAuditLogs() {
+            const entityType = document.getElementById('auditEntityType').value;
+            const entityId = document.getElementById('auditEntityId').value;
+            
+            try {
+                const url = entityId ? 
+                    `${API_BASE}/api/audit?entity=${entityType}&id=${entityId}` :
+                    `${API_BASE}/api/audit?entity=${entityType}`;
+                const response = await fetch(url);
+                const result = await response.json();
+                showResponse('auditResponse', result, !response.ok);
+            } catch (error) {
+                showResponse('auditResponse', { error: error.message }, true);
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEventListeners();
+            loadDashboardStats();
+        });
+    </script>
+</body>
+</html>
